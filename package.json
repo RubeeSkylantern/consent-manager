@@ -1,0 +1,28 @@
+{
+  "name": "consent-manager",
+  "version": "1.0.0",
+  "description": "Lightweight GDPR-compliant cookie consent manager with Google Consent Mode v2",
+  "main": "dist/consent-manager.esm.js",
+  "module": "dist/consent-manager.esm.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/consent-manager.esm.js",
+      "default": "./dist/consent-manager.esm.js"
+    },
+    "./adapters/*": "./src/adapters/*"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "build:watch": "node build.js --watch"
+  },
+  "devDependencies": {
+    "esbuild": "^0.20.0"
+  },
+  "files": [
+    "dist/",
+    "src/"
+  ],
+  "license": "UNLICENSED",
+  "private": true
+}
