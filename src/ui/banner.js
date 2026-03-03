@@ -15,7 +15,7 @@
 export function createBanner(config) {
   const texts = config.texts || {};
   const el = document.createElement('div');
-  el.className = 'cm-banner';
+  el.className = 'cm-banner cm-hidden';
   el.setAttribute('role', 'dialog');
   el.setAttribute('aria-label', texts.bannerAriaLabel || 'Gestion des cookies');
 
