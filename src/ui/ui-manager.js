@@ -84,6 +84,12 @@ export function initUI(cm, config = {}) {
       bannerEl.classList.add('cm-hidden');
       if (reopenerEl) reopenerEl.classList.remove('cm-hidden');
     },
+    // Révèle le bouton de réouverture sans toucher à la bannière : appelé au démarrage pour un
+    // visiteur dont le choix est déjà stocké, cas où hideBanner() n'a pas lieu d'être (la
+    // bannière n'a jamais été montrée, et l'émettre produirait un événement banner:hide trompeur).
+    showReopener() {
+      if (reopenerEl) reopenerEl.classList.remove('cm-hidden');
+    },
     showModal(categories) {
       modal.show(categories);
     },

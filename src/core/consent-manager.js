@@ -23,6 +23,7 @@ export class ConsentManager {
     this._initialized = false;
     this._pendingCallbacks = []; // onConsent callbacks en attente
     this._ui = null; // référence vers le module UI
+    this._decided = false; // un choix (stocké ou fait à l'instant) existe-t-il ?
   }
 
   /** Initialise le consent manager : lit le stockage, affiche la bannière si nécessaire */
@@ -33,8 +34,11 @@ export class ConsentManager {
     const stored = readConsent();
 
     if (stored && !isExpired(stored)) {
-      // Consentement existant et non expiré
+      // Consentement existant et non expiré : pas de bannière, mais le bouton de réouverture
+      // DOIT apparaître — le RGPD exige qu'un retrait soit aussi simple que le consentement.
       this.categories = { ...getDefaultConsent(), ...stored.c };
+      this._decided = true;
+      this._syncReopener();
       this._flushPendingCallbacks();
     } else {
       // Pas de consentement ou expiré → afficher la bannière
@@ -121,6 +125,7 @@ export class ConsentManager {
   reset() {
     clearConsent();
     clearProofs();
+    this._decided = false;
     this.categories = getDefaultConsent();
     updateGoogleConsent(this.categories);
     this._pendingCallbacks = [];
@@ -141,13 +146,30 @@ export class ConsentManager {
     this.emitter.off(event, fn);
   }
 
-  /** Attache le module UI */
+  /**
+   * Attache le module UI.
+   *
+   * Applique aussitôt l'état découlant d'un choix déjà connu : l'UI peut être attachée après
+   * init(), et faire dépendre la visibilité du bouton de réouverture de l'ordre des appels est
+   * précisément ce qui a produit cm-bug-001 (bouton masqué à vie pour un visiteur revenant).
+   */
   _setUI(ui) {
     this._ui = ui;
+    if (this._decided) {
+      this._syncReopener();
+    }
+  }
+
+  /** Révèle le bouton de réouverture dès qu'un choix existe. Sans effet si l'UI n'expose pas le hook. */
+  _syncReopener() {
+    if (this._ui && typeof this._ui.showReopener === 'function') {
+      this._ui.showReopener();
+    }
   }
 
   /** Sauvegarde l'état, update Google Consent, enregistre la preuve */
   _save(action) {
+    this._decided = true;
     writeConsent(this.categories);
     updateGoogleConsent(this.categories);
     recordProof(action, this.categories);
